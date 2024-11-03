@@ -1,0 +1,4 @@
+[submodule "GENESPACE"]
+	path = comparative_genomics/genespace/GENESPACE
+	url = https://github.com/hanneskramml/GENESPACE.git
+	branch = v1.2.3_HK
