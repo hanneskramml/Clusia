@@ -2,3 +2,7 @@
 	path = comparative_genomics/genespace/GENESPACE
 	url = https://github.com/hanneskramml/GENESPACE.git
 	branch = v1.2.3_HK
+[submodule "funannotate"]
+	path = annotation/funannotate/funannotate
+	url = https://github.com/hanneskramml/funannotate.git
+	branch = v1.8.11_HK
