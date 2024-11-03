@@ -1,0 +1,8 @@
+[03/06/23 12:57:33]: Loading genome assembly and parsing soft-masked repetitive sequences
+[03/06/23 13:04:25]: Genome loaded: 6,257 scaffolds; 2,798,200,496 bp; 55.82% repeats masked
+[03/06/23 13:04:25]: Generating protein fasta files from 76,555 EVM models
+[03/06/23 13:05:12]: now filtering out bad gene models (< 50 aa in length, transposable elements, etc).
+[03/06/23 13:05:12]: diamond blastp --sensitive --query Cmultiflora.evm.proteins.fa --threads 2 --out ./repeats.xml --db ./db/repeats.dmnd --evalue 1e-10 --max-target-seqs 1 --outfmt 5
+[03/06/23 13:06:18]: bedtools intersect -sorted -f 0.8 -a /scratch/ecogenomics/clusia/annotation/funannotate/Cmultiflora.evm.gff3.sorted.gff -b /scratch/ecogenomics/clusia/annotation/funannotate/Cmultiflora.genome.diploid.fna.repeatmasker.bed.sorted.bed
+[03/06/23 13:06:21]: Found 9,958 gene models to remove: 52 too short; 9 span gaps; 9,897 transposable elements
+[03/06/23 13:06:23]: 66,597 gene models remaining

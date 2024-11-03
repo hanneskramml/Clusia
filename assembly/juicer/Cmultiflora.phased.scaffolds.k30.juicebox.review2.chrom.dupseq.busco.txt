@@ -1,0 +1,30 @@
+# BUSCO version is: 5.4.3 
+# The lineage dataset is: eudicots_odb10 (Creation date: 2020-09-10, number of genomes: 31, number of BUSCOs: 2326)
+# Summarized benchmarking in BUSCO notation for file /scratch/ecogenomics/clusia/juicer/Cmultiflora.phased.scaffolds.k30.juicebox.review2.chrom.dupseq.fna
+# BUSCO was run in mode: euk_genome_met
+# Gene predictor used: metaeuk
+
+	***** Results: *****
+
+	C:96.5%[S:77.8%,D:18.7%],F:0.8%,M:2.7%,n:2326	   
+	2245	Complete BUSCOs (C)			   
+	1810	Complete and single-copy BUSCOs (S)	   
+	435	Complete and duplicated BUSCOs (D)	   
+	18	Fragmented BUSCOs (F)			   
+	63	Missing BUSCOs (M)			   
+	2326	Total BUSCO groups searched		   
+
+Assembly Statistics:
+	36	Number of scaffolds
+	2116	Number of contigs
+	1535525802	Total length
+	0.014%	Percent gaps
+	53 MB	Scaffold N50
+	1 MB	Contigs N50
+
+
+Dependencies and versions:
+	hmmsearch: 3.1
+	bbtools: 39.01
+	metaeuk: 6.a5d39d9
+	busco: 5.4.3

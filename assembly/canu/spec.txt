@@ -1,0 +1,26 @@
+# General options
+gnuplot=/usr/bin/gnuplot
+
+# Parameters for polyploid estimation and haplotype-separated assembly
+corOutCoverage=120 #amount of reads to be used for correction, smudgeplot needs 25% per haplotype, 20% lost at trimming, doesn’t affect the read accuracy/error-rate, highly resource demanding
+batOptions="-dg 3 -db 3 -dr 1 -ca 500 -cp 50" #poly parameters for bogart, more conservative at picking the error rate to use for the assembly to try to maintain haplotype separation
+saveReads=true #extract corrected and trimmed reads
+
+# speed optimization due to Sequel II and high coverage
+corErrorRate=0.25 #default in v2.2
+correctedErrorRate=0.035
+utgOvlErrorRate=0.065
+trimReadsCoverage=2
+trimReadsOverlap=500
+
+# cluster/runtime tweaks and cleanup
+ovbMemory=8g
+maxMemory=500g
+maxThreads=48
+ovsMemory=8-500g
+ovsThreads=4
+oeaMemory=32g
+#ovsMethod=parallel #not supported anymore, parallel anyway
+gridOptionsOVS="-p himem" #options applied to overlap store sorting jobs (up to 500gb)
+stageDirectory=$TMPDIR #slurm local temp directory
+purgeOverlaps=aggressive #removes intermediate overlap results as soon as possible

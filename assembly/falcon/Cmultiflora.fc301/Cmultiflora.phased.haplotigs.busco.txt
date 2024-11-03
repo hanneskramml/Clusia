@@ -1,0 +1,19 @@
+# BUSCO version is: 5.2.2 
+# The lineage dataset is: eudicots_odb10 (Creation date: 2020-09-10, number of genomes: 31, number of BUSCOs: 2326)
+# Summarized benchmarking in BUSCO notation for file /scratch/ecogenomics/clusia/falcon/Cmultiflora.fc301/Cmultiflora.phased.haplotigs.fna
+# BUSCO was run in mode: genome
+# Gene predictor used: metaeuk
+
+	***** Results: *****
+
+	C:89.3%[S:74.8%,D:14.5%],F:1.4%,M:9.3%,n:2326	   
+	2077	Complete BUSCOs (C)			   
+	1740	Complete and single-copy BUSCOs (S)	   
+	337	Complete and duplicated BUSCOs (D)	   
+	32	Fragmented BUSCOs (F)			   
+	217	Missing BUSCOs (M)			   
+	2326	Total BUSCO groups searched		   
+
+Dependencies and versions:
+	hmmsearch: 3.1
+	metaeuk: 4.a0f584d

@@ -1,0 +1,8 @@
+clusia_panomics_database/tables/data.proteomics.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.transcriptomics.plot.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.transcriptomics.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/feature.pseudogenes.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.diploidization.plot.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.diploidization.tsv filter=lfs diff=lfs merge=lfs -text
+clusia_panomics_database/tables/data.proteomics.plot.tsv filter=lfs diff=lfs merge=lfs -text
