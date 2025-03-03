@@ -6,8 +6,8 @@ library(data.table)   # TODO: replace rbindlist() with tidyverse::bind_rows(...,
 # *** Protein regulation analysis ***
 
 # Import protein data
-feature.proteins <- list.files(path = paste(DATA_ROOT, "Proteomics", sep = '/'), pattern = "C.*.regulation.xls", full.names = TRUE) %>%
-  lapply(read_excel) %>%
+feature.proteins <- list.files(path = paste(DATA_ROOT, "Proteomics", sep = '/'), pattern = "C.*.proteomics.xls", full.names = TRUE) %>%
+  lapply(read_excel, sheet = "Main matrix") %>%
   rbindlist(fill = TRUE) %>%
   drop_na(Accession) # remove contaminants
 
@@ -15,10 +15,10 @@ feature.proteins %<>%
   pivot_longer(cols = where(is.numeric), names_to = "SID", values_to = "regulation", values_drop_na = TRUE) %>%
   mutate(SID = as.integer(SID)) %>%
   left_join(meta.samples, by = join_by(SID == SID)) %>%
-  mutate(replicate = substr(Code, 1, 3),
-         condition = ifelse(substr(Code, 2, 2) == 'D', "C", ifelse(substr(Code, 2, 2) == 'H', "T", NA)),
-         timepoint = substr(Code, 4, 6)) %>%
-  select(sample = Code, replicate, condition, timepoint, transcript = Accession, regulation) %>%
+  mutate(replicate = substr(Sample, 1, 3),
+         condition = ifelse(substr(Sample, 2, 2) == 'D', "C", ifelse(substr(Sample, 2, 2) == 'H', "T", NA)),
+         timepoint = substr(Sample, 4, 6)) %>%
+  select(sample = Sample, replicate, condition, timepoint, transcript = Accession, regulation) %>%
   arrange(sample, replicate, condition, timepoint, transcript)
 
 # Create data matrix
@@ -47,19 +47,18 @@ data.proteomics.plot <-
     ungroup()
 
 
-# Supplemental Figure 7
+# Supplemental Figure 8
 
-pdf(paste(RESULTS_DIR, "figs", "proteins.cam.control.pdf", sep = '/'), width = 11, height = 8)
+pdf(paste(RESULTS_DIR, "figs", "proteins.cam.control.pdf", sep = '/'), width = 10, height = 8)
 data.proteomics.plot %>%
   filter(Condition == "C") %>%
   #filter(Condition == "T") %>%
   mutate(Order = max(REG.sum), .by = c(Pathway, Type, Function, GeneFamily, Homoeolog)) %>%
-  mutate(Strip = paste0(Group, " *C.", str_split_i(Species, "_", 2), "*")) %>%
   mutate(y = paste0("**", Homoeolog, "** (", GeneFamily, ")")) %>%
   arrange(Order) %>%
   ggplot(aes(x = Timepoint, y = factor(y, levels = unique(y)), size = REG.sum, color = REG.z)) +
   geom_point() +
-  facet_grid(rows = vars(Pathway), cols = vars(Strip), scales = "free", space = "free", switch = "y") +
+  facet_grid(Pathway ~ Group + Species, scales = "free", space = "free", switch = "y") +
   scale_size_area(name = "**Protein abundance**<br>summed relative regulation", limits = c(0, 0.01), oob = scales::squish) +
   scale_color_gradientn(name = "**Circadian abundance**<br>z-score within group", colours = viridis::viridis(20), limits = c(-1,1.5), oob = scales::squish) +
   guides(shape = guide_legend(order = 1), size = guide_legend(order = 2)) +
@@ -70,17 +69,16 @@ data.proteomics.plot %>%
   theme(legend.title = element_markdown(), axis.title.x = element_markdown(), axis.text.y = element_markdown())
 dev.off()
 
-pdf(paste(RESULTS_DIR, "figs", "proteins.cam.treatment.pdf", sep = '/'), width = 11, height = 8)
+pdf(paste(RESULTS_DIR, "figs", "proteins.cam.treatment.pdf", sep = '/'), width = 10, height = 8)
 data.proteomics.plot %>%
   #filter(Condition == "C") %>%
   filter(Condition == "T") %>%
   mutate(Order = max(REG.sum), .by = c(Pathway, Type, Function, GeneFamily, Homoeolog)) %>%
-  mutate(Strip = paste0(Group, " *C.", str_split_i(Species, "_", 2), "*")) %>%
   mutate(y = paste0("**", Homoeolog, "** (", GeneFamily, ")")) %>%
   arrange(Order) %>%
   ggplot(aes(x = Timepoint, y = factor(y, levels = unique(y)), size = REG.sum, color = REG.z)) +
   geom_point() +
-  facet_grid(rows = vars(Pathway), cols = vars(Strip), scales = "free", space = "free", switch = "y") +
+  facet_grid(Pathway ~ Group + Species, scales = "free", space = "free", switch = "y") +
   scale_size_area(name = "**Protein abundance**<br>summed relative regulation", limits = c(0, 0.01), oob = scales::squish) +
   scale_color_gradientn(name = "**Circadian abundance**<br>z-score within group", colours = viridis::viridis(20), limits = c(-1,1.5), oob = scales::squish) +
   guides(shape = guide_legend(order = 1), size = guide_legend(order = 2)) +

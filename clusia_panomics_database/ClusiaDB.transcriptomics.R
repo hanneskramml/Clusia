@@ -18,7 +18,7 @@ load_expression <- function(path) {
     replicate = replicate,
     condition = ifelse(condition == 'D', "C", ifelse(condition == 'H', "T", NA)),
     timepoint = timepoint,
-    read_tsv(path),
+    read_tsv(path, show_col_types = FALSE),
     stringsAsFactors = TRUE)
 }
 
@@ -53,19 +53,18 @@ data.transcriptomics.plot <-
   ungroup()
 
 
-# Supplemental Figure 6
+# Supplemental Figure 7
 
-pdf(paste(RESULTS_DIR, "figs", "expression.cam.control.pdf", sep = '/'), width = 9, height = 15)
+pdf(paste(RESULTS_DIR, "figs", "expression.cam.control.pdf", sep = '/'), width = 9, height = 13)
 data.transcriptomics.plot %>%
   filter(Condition == "C") %>%
   #filter(Condition == "T") %>%
   mutate(Order = max(TPM.sum), .by = c(Pathway, Type, Function, GeneFamily, Homoeolog)) %>%
-  mutate(Strip = paste0(Group, " *C.", str_split_i(Species, "_", 2), "*")) %>%
   mutate(y = paste0("**", Homoeolog, "** (", GeneFamily, ")")) %>%
   arrange(Order) %>%
   ggplot(aes(x = Timepoint, y = factor(y, levels = unique(y)), size = TPM.sum, color = TPM.z)) +
   geom_point() +
-  facet_grid(rows = vars(Pathway), cols = vars(Strip), scales = "free", space = "free", switch = "y") +
+  facet_grid(Pathway ~ Group + Species, scales = "free", space = "free", switch = "y") +
   scale_size_area(name = "**Gene expression**<br>summed TPM", limits = c(0, 500), oob = scales::squish) +
   scale_color_gradientn(name = "**Circadian expression**<br>z-score within group", colours = viridis::viridis(20), limits = c(-1,1.5), oob = scales::squish) +
   guides(shape = guide_legend(order = 1), size = guide_legend(order = 2)) +
@@ -76,17 +75,16 @@ data.transcriptomics.plot %>%
   theme(axis.title.x = element_markdown(), axis.text.y = element_markdown(), legend.title = element_markdown())
 dev.off()
 
-pdf(paste(RESULTS_DIR, "figs", "expression.cam.treatment.pdf", sep = '/'), width = 9, height = 15)
+pdf(paste(RESULTS_DIR, "figs", "expression.cam.treatment.pdf", sep = '/'), width = 9, height = 13)
 data.transcriptomics.plot %>%
   #filter(Condition == "C") %>%
   filter(Condition == "T") %>%
   mutate(Order = max(TPM.sum), .by = c(Pathway, Type, Function, GeneFamily, Homoeolog)) %>%
-  mutate(Strip = paste0(Group, " *C.", str_split_i(Species, "_", 2), "*")) %>%
   mutate(y = paste0("**", Homoeolog, "** (", GeneFamily, ")")) %>%
   arrange(Order) %>%
   ggplot(aes(x = Timepoint, y = factor(y, levels = unique(y)), size = TPM.sum, color = TPM.z)) +
   geom_point() +
-  facet_grid(rows = vars(Pathway), cols = vars(Strip), scales = "free", space = "free", switch = "y") +
+  facet_grid(Pathway ~ Group + Species, scales = "free", space = "free", switch = "y") +
   scale_size_area(name = "**Gene expression**<br>summed TPM", limits = c(0, 500), oob = scales::squish) +
   scale_color_gradientn(name = "**Circadian expression**<br>z-score within group", colours = viridis::viridis(20), limits = c(-1,1.5), oob = scales::squish) +
   guides(shape = guide_legend(order = 1), size = guide_legend(order = 2)) +

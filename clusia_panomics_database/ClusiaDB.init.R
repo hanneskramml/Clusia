@@ -27,9 +27,12 @@ library(readxl)
 
 
 # *** Global parameters/settings ***
-DATA_ROOT <- "~/git/Clusia/data"
-CODE_DIR <- "~/git/Clusia/clusia_panomics_database"
-RESULTS_DIR <- "~/git/Clusia/clusia_panomics_database"
+if (!exists("DATA_ROOT") || is.null(DATA_ROOT))
+  DATA_ROOT <- "~/git/Clusia/data"
+if (!exists("CODE_DIR") || is.null(CODE_DIR))
+  CODE_DIR <- "~/git/Clusia/clusia_panomics_database"
+if (!exists("RESULTS_DIR") || is.null(RESULTS_DIR))
+  RESULTS_DIR <- "~/git/Clusia/data/ClusiaDB"
 
 SPECIES_CLUSIA <- c("Clusia_multiflora", "Clusia_minor", "Clusia_rosea")
 SPECIES_OUTGROUP <- c(SPECIES_CLUSIA, "Vitis_vinifera", "Arabidopsis_thaliana")
@@ -110,6 +113,8 @@ meta.families.blacklist <- read_excel("metadata.xlsx", sheet = "Families", range
 meta.families.gene <- read_excel("metadata.xlsx", sheet = "Families", range = cell_cols("H:J"), col_names = TRUE)
 meta.homoeologs.name <- read_excel("metadata.xlsx", sheet = "Homoeologs", range = cell_cols("A:B"))
 meta.homoeologs.blacklist <- read_excel("metadata.xlsx", sheet = "Homoeologs", range = cell_cols("D:E")) %>% select(SynOG = Blacklist, Note)
+meta.homoeologs.gene <- read_excel("metadata.xlsx", sheet = "Homoeologs", range = cell_cols("G:H"), col_names = TRUE)
+meta.homoeologs.group <- read_excel("metadata.xlsx", sheet = "Homoeologs", range = cell_cols("J:K"), col_names = TRUE)
 meta.samples <- read_excel("metadata.xlsx", sheet = "Samples")
 
 
@@ -209,7 +214,7 @@ for (i in 1:5) {
     arrange(Gene, qname)
 
   tmp.update <- data %>%
-    filter(Species %in% SPECIES_CLUSIA, is.na(Homoeolog.og) | is.na(Group)) %>%
+    filter(Species %in% SPECIES_CLUSIA, is.na(Homoeolog.og) | is.na(Group) | is.na(Group.ref)) %>%
     mutate(id = str_sub(Contig, end = 10)) %>%
     inner_join(
       tmp.alignment %>%
@@ -223,12 +228,14 @@ for (i in 1:5) {
     group_by(GeneFamily, Gene) %>%
     filter(id == aln.qname) %>%     # map genes to predominant chrom-level haplotype
     filter(Gene != aln.Gene) %>%    # remove self matching alignments
-    filter(n() == 1) %>%            # filter for unambigous homologues, TODO: handle tandem gene duplications located on a single contig
-    mutate(Homoeolog.og = if_else(is.na(Homoeolog.og), aln.Homoeolog.og, Homoeolog.og)) %>%
-    mutate(Homoeolog.flag = if_else(is.na(Homoeolog.flag), "ALN", Homoeolog.flag)) %>%
-    mutate(Group = if_else(is.na(Group), aln.Group, Group)) %>%
-    mutate(Group.ref = if_else(is.na(Group.ref), aln.Gene, Group.ref)) %>%
-    select(GeneFamily, Gene, Homoeolog.og, Homoeolog.flag, Group, Group.ref)
+    mutate(n.og = n_distinct(aln.Homoeolog.og), n.group = n_distinct(aln.Group), n.gene = n_distinct(aln.Gene)) %>%   # handle tandem gene duplications located on a single contig (rescue unambigous values)
+    filter((is.na(Homoeolog.og) & n.og == 1) | (is.na(Group) & n.group == 1) | (is.na(Group.ref) & n.gene == 1)) %>%  # filter for unambigous homologues
+    mutate(Homoeolog.og = if_else(is.na(Homoeolog.og) & n.og == 1, aln.Homoeolog.og, Homoeolog.og)) %>%
+    mutate(Group = if_else(is.na(Group) & n.group == 1, aln.Group, Group)) %>%
+    mutate(Group.ref = if_else(is.na(Group.ref) & n.gene == 1, aln.Gene, Group.ref)) %>%
+    mutate(Homoeolog.flag = if_else(is.na(Homoeolog.flag) & n.og == 1 & n.group == 1 & n.gene == 1, "ALN", Homoeolog.flag)) %>%
+    mutate(Homoeolog.flag = if_else(is.na(Homoeolog.flag) & (n.og == 1 | n.group == 1 | n.gene == 1), "RESC", Homoeolog.flag)) %>%
+    distinct(GeneFamily, Gene, Homoeolog.og, Homoeolog.flag, Group, Group.ref)
 
   if (nrow(tmp.update) > 0) {
     cat("Iteration ", i, ": Resolving ", nrow(tmp.update), " gene(s)...\n")
@@ -256,7 +263,6 @@ data %<>%
       count(Homoeolog.og, Homoeolog) %>%
       group_by(Homoeolog.og) %>%
       filter(n == max(n)) %>%
-      #summarise(SynOG.name = paste0(SynOG.name, collapse = "/")),
       summarise(Homoeolog = dplyr::first(Homoeolog)),
     by = join_by(Homoeolog.og)) %>%
   relocate(Homoeolog, .before = Homoeolog.og)
@@ -264,6 +270,10 @@ data %<>%
 # Incorporate manually curated homoeolog names (=> investigate mapping rules in case of error)
 data <- data %>%
   rows_update(meta.homoeologs.name %>% select(Homoeolog.og = SynOG, Homoeolog = Name), by = "Homoeolog.og")
+data <- data %>%
+  rows_update(meta.homoeologs.gene %>% select(Gene, Homoeolog = Name), by = "Gene")
+data <- data %>%
+  rows_update(meta.homoeologs.group %>% select(Gene, Group), by = "Gene")
 
 # TODO: Check feasibility to additionally propagate from Homoeolog to gene family or reintegrate single-copy genespace run (clusia.subgenomes)
 
