@@ -32,4 +32,19 @@ ripd <- plot_riparian(gsParam = gsParam, useRegions = FALSE, useOrder = TRUE, fo
                       chrLabFun = function(x) gsub("^0", "", gsub("chr|cmu|cmi.*|cro.*", "", tolower(x))))
 dev.off()
 
+
+# Dotplot of homoeologous chromosomes (Supplemental Fig. 4)
+load("clusia.outgroup/results/gsParams.rda")
+
+pdf(paste(RESULTS_DIR, "figs", "dotplot.H1.pdf", sep = '/'))
+hits <- read_allBlast(filepath = file.path(gsParam$paths$syntenicHits, "Clusia_multiflora_H1_vs_Clusia_multiflora_H1.allBlast.txt.gz"))
+ggdotplot(hits = hits, type = "raw", verbose = FALSE)
+dev.off()
+
+pdf(paste(RESULTS_DIR, "figs", "dotplot.H2.pdf", sep = '/'))
+hits <- read_allBlast(filepath = file.path(gsParam$paths$syntenicHits, "Clusia_multiflora_H2_vs_Clusia_multiflora_H2.allBlast.txt.gz"))
+ggdotplot(hits = hits, type = "raw", verbose = FALSE)
+dev.off()
+
+
 setwd(CODE_DIR)

@@ -1,6 +1,9 @@
 DATA_ROOT <- "~/git/Clusia/data"
+RESULTS_DIR <- "~/git/Clusia/data/ClusiaDB"
 CODE_DIR <- "~/git/Clusia/clusia_panomics_database"
-RESULTS_DIR <- "~/git/Clusia/clusia_panomics_database"
+
+
+setwd(CODE_DIR)
 
 cat("Initializing panomics database...\n")
 source("ClusiaDB.init.R", echo = TRUE)
@@ -20,14 +23,17 @@ source("ClusiaDB.transcriptomics.R", echo = TRUE)
 cat("Processing proteins...\n")
 source("ClusiaDB.proteomics.R", echo = TRUE)
 
-cat("Making circos plot...\n")
+cat("Generating circos plot...\n")
 source("ClusiaDB.circlize.R", echo = TRUE)
 
-cat("Making riparian plots...\n")
+cat("Generating riparian plots...\n")
 source("ClusiaDB.synteny.R", echo = TRUE)
 
-cat("Making gene copy plot...\n")
+cat("Generating gene copy plot...\n")
 source("ClusiaDB.counts.R", echo = TRUE)
+
+cat("Performing gene enrichment analysis...\n")
+source("ClusiaDB.enrichment.R", echo = TRUE)
 
 cat("Exporting selected dataframes...\n")
 source("ClusiaDB.export.R", echo = TRUE)

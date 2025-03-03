@@ -17,8 +17,8 @@ library(ggtext)
 data.diploidization <- data %>%
   filter(Haplotype == "PREDOM") %>%
   filter(!Homoeolog.og %in% (meta.homoeologs.blacklist %>% pull(SynOG))) %>%
-  mutate(GeneName = if_else(!is.na(AltName) & AltName != Name, paste(Name, AltName, sep="/"), Name)) %>%
-  select(1:15, last_col()) %>%
+  mutate(Name = if_else(!is.na(AltName) & AltName != Name, paste(Name, AltName, sep="/"), Name), Gene.length = as.integer(End - Start + 1)) %>%
+  select(1:15, Name, Ontology, KEGG_ko, Gene.length, CDS.length = CDSlen, CDS.cov = em_scov) %>%
   left_join(
     src.introns %>%
       group_by(parent) %>%
@@ -32,15 +32,15 @@ data.diploidization <- data %>%
   left_join(
     feature.pseudogenes %>%
       group_by(Gene = str_replace(overlap, pattern = "(^[Cmu|Cmi|Cro].*)\\.t\\d+",  replacement ="\\1")) %>%
-      summarise(Pseudo.id = paste0(pid, collapse = ", "), Pseudo.parent = paste0(parent, collapse = ", "), Pseudo.frac = mean(frac), Pseudo.ins = sum(ins), Pseudo.del = sum(del), Pseudo.shift = sum(shift), Pseudo.stop = sum(stop), Pseudo.polya = sum(polya), Pseudo.ident = mean(ident), Pseudo.type = paste0(type, collapse = ", ")),
+      summarise(Pseudo.id = paste0(pid, collapse = ", "), Pseudo.parent = paste0(parent, collapse = ", "), Pseudo.n = n(), Pseudo.frac = mean(frac), Pseudo.ins = sum(ins), Pseudo.del = sum(del), Pseudo.shift = sum(shift), Pseudo.stop = sum(stop), Pseudo.polya = sum(polya), Pseudo.ident = mean(ident), Pseudo.type = paste0(type, collapse = ", ")),
     by = join_by(Gene)) %>%
-  replace_na(list(Intron.n = 0, Intron.length = 0, Intron.max = 0, Repeat.n = 0, Repeat.length = 0, Pseudo.frac = 0, Pseudo.ident = 0)) %>%
+  replace_na(list(CDS.cov = 0, Intron.n = 0, Intron.length = 0, Intron.max = 0, Repeat.n = 0, Repeat.length = 0, Pseudo.n = 0, Pseudo.frac = 0, Pseudo.ident = 0)) %>%
+  mutate(Gene.length.z = (Gene.length-mean(Gene.length))/sd(Gene.length), .after = Gene.length) %>%
   mutate(Intron.length.z = (Intron.length-mean(Intron.length))/sd(Intron.length), .after = Intron.length) %>%
   mutate(Repeat.length.z = (Repeat.length-mean(Repeat.length))/sd(Repeat.length), .after = Repeat.length) %>%
   rowwise() %>%
   mutate(Pseudo.evidence = sum(c_across(c(Pseudo.shift, Pseudo.stop, Pseudo.polya)), na.rm = TRUE), .after = Pseudo.polya) %>%
   ungroup() %>%
-  mutate(Pseudo.evidence.z = (Pseudo.evidence-mean(Pseudo.evidence))/sd(Pseudo.evidence), .after = Pseudo.evidence) %>%
   mutate(XFunct.non = if_else(!is.na(Pseudo.id), TRUE, FALSE)) %>%
   mutate(XFunct.neo = FALSE) %>%
   mutate(XFunct.sub = FALSE) %>%
