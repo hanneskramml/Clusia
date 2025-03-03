@@ -1,3 +1,6 @@
 /data/
+/apps/
+/scripts/
+/misc/
 .idea
 .DS_Store
