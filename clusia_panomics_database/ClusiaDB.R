@@ -35,6 +35,9 @@ source("ClusiaDB.counts.R", echo = TRUE)
 cat("Performing gene enrichment analysis...\n")
 source("ClusiaDB.enrichment.R", echo = TRUE)
 
+cat("Processing physiological experiments...\n")
+source("ClusiaDB.experiments.R", echo = TRUE)
+
 cat("Exporting selected dataframes...\n")
 source("ClusiaDB.export.R", echo = TRUE)
 
