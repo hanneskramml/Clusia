@@ -2,7 +2,7 @@ library(tidyverse)
 
 
 # Load and reclassify repeats based on Wicker et al. (2007)
-src.repeats <- read_tsv(paste(DATA_ROOT, "Repeats", "Cmultiflora_v2.scaffolds.repeats.bed.gz", sep = '/'), col_types = "ciicicdddcccici", col_names = FALSE, na = c("", "NA", ".")) %>%
+src.repeats <- read_tsv(paste(DATA_ROOT, "Repeats", "Cmajor_v2.scaffolds.repeats.bed.gz", sep = '/'), col_types = "ciicicdddcccici", col_names = FALSE, na = c("", "NA", ".")) %>%
   mutate(order = str_split_i(X11,"/", 1), superfamily = str_split_i(X11,"/", 2), rstart = as.integer(if_else(X6 == "+", X12, X14))) %>%
   select(chr = X1, start = X2, end = X3, repeats = X4, order, superfamily, rstart, rend = X13, rstrand = X6, score = X5, div = X7, del = X8, ins = X9, id = X15) %>%
   mutate(
@@ -58,7 +58,7 @@ gs_colors <- function(n = 10){
   return(pal(n))
 }
 
-src.repeats.kimura <- read_tsv(paste(DATA_ROOT, "Repeats", "Cmultiflora_v2.repeatlandscape.tsv.gz", sep = '/'), col_types = "ccii") %>%
+src.repeats.kimura <- read_tsv(paste(DATA_ROOT, "Repeats", "Cmajor_v2.repeatlandscape.tsv.gz", sep = '/'), col_types = "ccii") %>%
   filter(!repeats == "combined")
 
 feature.repeats.landscape <- src.repeats %>%
@@ -68,7 +68,7 @@ feature.repeats.landscape <- src.repeats %>%
     by = join_by(repeats),
     relationship = "one-to-many") %>%
   left_join(
-    read_tsv(paste(DATA_ROOT, "Assembly", "Cmultiflora_v2.scaffolds.size.bed", sep = '/'), col_types = "cii", col_names = FALSE) %>%
+    read_tsv(paste(DATA_ROOT, "Features", "Cmajor.scaffolds.bed", sep = '/'), col_types = "cii", col_names = FALSE) %>%
       select(chr = X1, size = X3),
     by = join_by(chr)) %>%
   inner_join(

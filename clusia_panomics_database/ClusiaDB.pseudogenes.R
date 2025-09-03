@@ -1,11 +1,11 @@
 library(tidyverse)
 
 
-src.pseudogenes <- read_tsv(paste(DATA_ROOT, "Pseudogenes", "Cmultiflora.pseudogenes.tsv", sep = '/'), col_type = "ciiccdiiiiddicc") %>%
+src.pseudogenes <- read_tsv(paste(DATA_ROOT, "Pseudogenes", "Cmajor.pseudogenes.tsv", sep = '/'), col_type = "ciiccdiiiiddicc") %>%
   mutate(length = as.integer(end - start + 1)) %>%
   select(chr, start, end, pid = id, parent = query,strand, length, 6:14)
 
-src.overlaps <- read_tsv(paste(DATA_ROOT, "Pseudogenes", "Cmultiflora.pseudogenes.overlaps.bed", sep = '/'), col_type = "ciicciicicii", col_names = FALSE, na = c("", "NA", ".")) %>%
+src.overlaps <- read_tsv(paste(DATA_ROOT, "Pseudogenes", "Cmajor.pseudogenes.overlaps.bed", sep = '/'), col_type = "ciicciicicii", col_names = FALSE, na = c("", "NA", ".")) %>%
   select(chr = X1, start = X2, end = X3, pid = X4, eid = X8, estart = X6, eend = X7, estrand = X10, elength = X11, eoverlap = X12) %>%
   mutate(start = as.integer(start+1)) %>%
   group_by(chr, start, end, pid) %>%
@@ -39,7 +39,7 @@ feature.pseudogenes %>%
   count(model)
 
 
-# Figure 2c
+# Figure 3c
 pdf(paste(RESULTS_DIR, "figs", "pseudogenes.pdf", sep = '/'), width = 5)
 
 feature.pseudogenes %>%

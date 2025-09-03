@@ -90,7 +90,7 @@ data.proteomics.plot %>%
 dev.off()
 
 
-# Figure 5b
+# Figure 6b
 pdf(paste(RESULTS_DIR, "figs", "proteins.phs1.pdf", sep = '/'), width = 10, height = 4)
 data.proteomics.plot %>%
   group_by(Species) %>%
@@ -104,7 +104,7 @@ data.proteomics.plot %>%
 dev.off()
 
 
-# Figure 4gi
+# Figure 5gi
 pdf(paste(RESULTS_DIR, "figs", "proteins.carboxylation.heatmap.pdf", sep = '/'))
 data.proteomics.plot %>%
   filter(Pathway == "Carboxylation") %>%

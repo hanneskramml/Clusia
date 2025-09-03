@@ -16,14 +16,14 @@ color <- c('#C4645C', '#E27F5C', '#F79D5E', '#FDBE63', '#FDDD98', '#F7F7D7', '#D
 
 circos.clear()
 
-genome <- read.table(paste(DATA_ROOT, "Assembly", "Cmultiflora_v2.scaffolds.size.bed", sep = '/'), col.names = c("chr","start","end")) %>%
+genome <- read.table(paste(DATA_ROOT, "Features", "Cmajor.scaffolds.bed", sep = '/'), col.names = c("chr","start","end")) %>%
   mutate(chr = fct_relevel(chr, chrom_order),
          chr = fct_relevel(chr, c("CMU00.1", "CMU00.2", "CMU00.3"), after = Inf)) %>%
   arrange(chr)
 
-genes <- genomicDensity(read.table(paste(DATA_ROOT, "Annotation/Cmultiflora_v2.2.annotation.longestIsoform.bed.gz", sep = '/')), window.size = 1e6)
-pseudogenes <- genomicDensity(read.table(paste(DATA_ROOT, "Pseudogenes/Cmultiflora.pseudogenes.bed.gz", sep = '/')), window.size = 1e6)
-repeats <- genomicDensity(read.table(paste(DATA_ROOT, "Repeats/Cmultiflora_v2.scaffolds.repeats.composite_masked.bed.gz", sep = '/')), window.size = 1e6)
+genes <- genomicDensity(read.table(paste(DATA_ROOT, "Annotation/Cmajor_v2.2.annotation.longestIsoform.bed.gz", sep = '/')), window.size = 1e6)
+pseudogenes <- genomicDensity(read.table(paste(DATA_ROOT, "Pseudogenes/Cmajor.pseudogenes.bed.gz", sep = '/')), window.size = 1e6)
+repeats <- genomicDensity(read.table(paste(DATA_ROOT, "Repeats/Cmajor_v2.scaffolds.repeats.composite_masked.bed.gz", sep = '/')), window.size = 1e6)
 
 synteny <- read.csv(paste(DATA_ROOT, "Pangenes/clusia.outgroup/results/syntenicBlock_coordinates.csv", sep = '/')) %>%
   filter(genome1 == "Clusia_multiflora_H1", genome2 == "Clusia_multiflora_H2", chr1 != chr2) %>%
@@ -46,7 +46,7 @@ synteny <- read.csv(paste(DATA_ROOT, "Pangenes/clusia.outgroup/results/syntenicB
   ))
 
 
-
+# Figure 2
 pdf(paste(RESULTS_DIR, "figs", "circusplot.pdf", sep = '/'))
 
 circos.par(

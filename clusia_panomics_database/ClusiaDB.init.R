@@ -3,38 +3,39 @@
 # *** Package/library requirements ***
 if(!requireNamespace('BiocManager', quietly = TRUE))
   install.packages('BiocManager')
-if (!requireNamespace("devtools", quietly = TRUE))
-  install.packages("devtools")
-if(!requireNamespace('tidyverse', quietly = TRUE))
-  install.packages('tidyverse')
 
 if(!requireNamespace('cogeqc', quietly = TRUE))
   BiocManager::install('cogeqc')
+library(cogeqc)
+
 if(!requireNamespace('Rsamtools', quietly = TRUE))
   BiocManager::install('Rsamtools')
+library(Rsamtools)
+
+if(!requireNamespace('tidyverse', quietly = TRUE))
+  install.packages('tidyverse')
+library(tidyverse)
+library(readxl)
+
+if (!requireNamespace("devtools", quietly = TRUE))
+  install.packages("devtools")
 
 if(!requireNamespace('GENESPACE', quietly = TRUE))
   devtools::install_github('jtlovell/GENESPACE')
-
 #devtools::install_github("jtlovell/GENESPACE@v1.2.3", upgrade = F)
-#devtools::load_all("~/git/Clusia/Submodules/GENESPACE")  # local dev => overwrite threshold for rerunning OF in syntenic orthogroups (Cmu), base: v1.2.3
-
-library(cogeqc)
+#devtools::load_all("~/git/Clusia/Submodules/GENESPACE")  # local dev => overwrite threshold for rerunning OF in syntenic orthogroups (Cma), base: v1.2.3
 library(GENESPACE)
-library(Rsamtools)
-library(tidyverse)
-library(readxl)
 
 
 # *** Global parameters/settings ***
 if (!exists("DATA_ROOT") || is.null(DATA_ROOT))
   DATA_ROOT <- "~/git/Clusia/data"
-if (!exists("CODE_DIR") || is.null(CODE_DIR))
-  CODE_DIR <- "~/git/Clusia/clusia_panomics_database"
 if (!exists("RESULTS_DIR") || is.null(RESULTS_DIR))
   RESULTS_DIR <- "~/git/Clusia/data/ClusiaDB"
+if (!exists("CODE_DIR") || is.null(CODE_DIR))
+  CODE_DIR <- "~/git/Clusia/clusia_panomics_database"
 
-SPECIES_CLUSIA <- c("Clusia_multiflora", "Clusia_minor", "Clusia_rosea")
+SPECIES_CLUSIA <- c("Clusia_major", "Clusia_minor", "Clusia_rosea")
 SPECIES_OUTGROUP <- c(SPECIES_CLUSIA, "Vitis_vinifera", "Arabidopsis_thaliana")
 
 options(dplyr.summarise.inform = FALSE)
@@ -76,7 +77,7 @@ src.pangenes.H2 <- load_pangenes(gsParam, "Clusia_multiflora_H2")
 setwd(paste(DATA_ROOT, "Annotation", sep = '/'))
 
 src.annotation <-
-  c("Cmultiflora_v2.2.annotation.tsv", "Cminor_v1.2.annotation.tsv", "Crosea_v1.2.annotation.tsv") %>%
+  c("Cmajor_v2.2.annotation.tsv", "Cminor_v1.2.annotation.tsv", "Crosea_v1.2.annotation.tsv") %>%
   read_tsv(col_types = "ccciiciicccccccccccddd", na = c("", "NA", "."))
 
 
@@ -98,7 +99,7 @@ data <- src.orthogroups %>%
   mutate(Haplotype = if_else(str_starts(Species, "Clusia_multiflora"), str_replace_all(Species, c("Clusia_multiflora_H1" = "PREDOM", "Clusia_multiflora_H2" = "PREDOM", "Clusia_multiflora_ALLELIC" = "ALLELIC")), NA), .after = Species) %>%
   mutate(Group = if_else(Haplotype == "PREDOM", str_replace(Species, pattern = "Clusia_multiflora_(..)",  replacement ="\\1"), NA), .after = Homoeolog.flag) %>%
   mutate(Group.ref = if_else(Haplotype == "PREDOM", Gene, NA), .after = Group) %>%
-  mutate(Species = if_else(str_starts(Species, "Clusia_multiflora"), "Clusia_multiflora", Species)) %>%
+  mutate(Species = if_else(str_starts(Species, "Clusia_multiflora"), "Clusia_major", Species)) %>%
   mutate(Species = fct_relevel(Species, SPECIES_OUTGROUP)) %>%
   mutate(Haplotype = fct_relevel(Haplotype, c("PREDOM", "ALLELIC"))) %>%
   arrange(Orthogroup, Homoeolog.og, Species, Haplotype, Gene, Transcript)
@@ -148,8 +149,8 @@ data <- data %>%
   rows_update(meta.families.gene %>% select(Gene, GeneFamily), by = "Gene")
 
 
-# Assign underlying contigs to chromosomal genes (incorporate Cmu alleles based on unzipping/phasing information)
-feature.contigs <- list.files(path = paste(DATA_ROOT, "Features", sep = '/'), pattern = "Cmultiflora.genes.contigs.bed", full.names = TRUE) %>%
+# Assign underlying contigs to chromosomal genes (incorporate Cma alleles based on unzipping/phasing information)
+feature.contigs <- list.files(path = paste(DATA_ROOT, "Features", sep = '/'), pattern = "Cmajor.genes.contigs.bed", full.names = TRUE) %>%
   read_tsv(col_select = c(4, 1, 11, 15), col_names = FALSE, na = c("", "NA", ".")) %>%
   rename_all(~c("gene", "chr", "contig", "length")) %>%
   drop_na(contig) %>%
@@ -163,7 +164,7 @@ data %<>%
   relocate(Contig, .after = Chr)
 
 
-# Process clusia sequence alignments for every C. multiflora gene resolved at chrom-level (takes some time...)
+# Process clusia sequence alignments for every C. major gene resolved at chrom-level (takes some time...)
 load_alignment <- function (file) {
   cols <- c('qname', 'flag', 'strand', 'pos', 'qwidth', 'mapq', 'cigar')
   ranges <- data %>%
@@ -185,7 +186,7 @@ load_alignment <- function (file) {
 }
 
 if (!exists("feature.bam") || is.null(feature.bam))
-  feature.bam <- list.files(path = paste(DATA_ROOT, "Alignment", sep = '/'), pattern = "Cmultiflora.scaffolds.alignment.[contigs|Cminor|Crosea]*.bam$", full.names = TRUE) %>%
+  feature.bam <- list.files(path = paste(DATA_ROOT, "Alignment", sep = '/'), pattern = "Cmajor.scaffolds.alignment.[contigs|Cminor|Crosea]*.bam$", full.names = TRUE) %>%
     lapply(load_alignment) %>%
     bind_rows()
 
@@ -201,7 +202,7 @@ propagate_synteny <- function (data, from, to) {
 }
 
 
-# Resolve alignment-based homologs of Cmu_ALLELIC, C. minor & C. rosea (handles "non-syntenic"/unresolved genes due to short sequences, gene artefacts, etc.)
+# Resolve alignment-based homologs of Cma_ALLELIC, C. minor & C. rosea (handles "non-syntenic"/unresolved genes due to short sequences, gene artefacts, etc.)
 # Propagate syntenic relationship to next higher level (group & gene family)
 # Iterate until all unambigous homologous relationships are resolved (or after max. 5 runs)
 for (i in 1:5) {

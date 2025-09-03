@@ -2,7 +2,7 @@ library(tidyverse)
 
 
 # Orthogroup counts based on diploid outgroup
-# Select for orthogroups having at least half of all eudicot species present (remove lineage/species-specific likely paralogous orthogroups)
+# Select for orthogroups having at least half of all eudicot species present (remove lineage/species-specific likely paralogous orthogroups containing genic fragments)
 # Filter for overdispersed orthogroups having not more than 8*ploidy genes per homoeolog/species
 # Outgroup having at least one gene present, TODO: Include others like highly diploidized Ath
 feature.counts.og.vitis <- feature.counts.og %>%
@@ -14,6 +14,18 @@ feature.counts.og.vitis <- feature.counts.og %>%
   mutate(Clusia_minor = 1.0 - (Vitis_vinifera - Clusia_minor) / Vitis_vinifera) %>%
   mutate(Clusia_rosea = 1.0 - (Vitis_vinifera - Clusia_rosea) / Vitis_vinifera) %>%
   select(Orthogroup, Clusia_multiflora_H1, Clusia_multiflora_H2, Clusia_minor, Clusia_rosea)
+
+feature.counts.gf <- data %>%
+  replace_na(list(Haplotype = "PREDOM")) %>%
+  filter(!is.na(GeneFamily), Haplotype == "PREDOM") %>%
+  select(GeneFamily, Species, Gene) %>%
+  pivot_wider(names_from = Species, values_from = Gene, values_fn = length) %>%
+  mutate(across(everything(), ~replace_na(.x, 0))) %>%
+  rowwise(GeneFamily) %>%
+  mutate(Species = sum(c_across(1:5) > 0, na.rm = TRUE), Genes = sum(c_across(1:5), na.rm = TRUE)) %>%
+  relocate(Species, Genes, .after = GeneFamily) %>%
+  ungroup()
+
 
 # Summary of genes included
 feature.counts.og %>%
@@ -35,7 +47,7 @@ feature.counts.og.vitis %>%
   scale_x_continuous(name="Relative gene copies per outgroup", breaks=0:10, limits=c(0, 10))
 dev.off()
 
-# Plot gene familiy expansion/contraction, Figure 2d
+# Plot gene familiy expansion/contraction, Figure 3d
 pdf(paste(RESULTS_DIR, "figs", "counts.og.vitis.variation.pdf", sep = '/'), height = 4, width = 8)
 feature.counts.og.vitis %>%
   pivot_longer(cols = !Orthogroup, names_to = "Species", values_to = "ratio") %>%

@@ -56,7 +56,7 @@ data.diploidization %>%
 data.diploidization %>% arrange(desc(Intron.length))   #GWD3/PWD => Top1
 data.diploidization %>% arrange(desc(Repeat.length))   #GWD3/PWD => Top10 (total intronic repeat length)
 
-# Figure 3c
+# Figure 4c
 pdf(paste(RESULTS_DIR, "figs", "repeat.lengths.pdf", sep = '/'))
 data.diploidization %>%
   ggplot(aes(x=Repeat.length, y=Intron.length)) +
@@ -68,7 +68,7 @@ data.diploidization %>%
 dev.off()
 
 
-# Plot figures for genic diploidization
+# Plot figures for genic diploidization (Figure 4a, Supplemental Fig. 6)
 data.diploidization.plot <-
   data.diploidization %>%
   filter(!is.na(Pathway)) %>%

@@ -96,7 +96,7 @@ data.transcriptomics.plot %>%
 dev.off()
 
 
-# Figure 5a
+# Figure 6a
 pdf(paste(RESULTS_DIR, "figs", "expression.bam3.pdf", sep = '/'), width = 9, height = 6)
 data.transcriptomics.plot %>%
   filter(GeneFamily == "OG0005653", Homoeolog == "BAM3") %>%
@@ -111,11 +111,11 @@ data.transcriptomics.plot %>%
 dev.off()
 
 
-# Figure 4h
+# Figure 5h
 pdf(paste(RESULTS_DIR, "figs", "expression.pepc-kinase.pdf", sep = '/'))
 data.transcriptomics %>%
   filter(Function == "PEPC-kinase") %>%
-  filter(Species == "Clusia_multiflora") %>%
+  filter(Species == "Clusia_major") %>%
   #filter(Species == "Clusia_rosea") %>%
   mutate(Strip = paste(Homoeolog.og, Group)) %>%
   ggplot(aes(x=Timepoint, y=Gene, fill=TPM.mean)) +
