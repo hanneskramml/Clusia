@@ -10,7 +10,7 @@ library(ggnewscale)
 library(ggtext)
 
 
-# Script requires ClusiaDB.R, ClusiaDB.pseudogenes.R, ClusiaDB.repeats.R
+# Script requires ClusiaDB.init.R, ClusiaDB.pseudogenes.R, ClusiaDB.repeats.R
 
 
 # Create feature matrix and calculate genome-wide z-scores
@@ -31,6 +31,7 @@ data.diploidization <- data %>%
     by = join_by(Transcript == parent)) %>%
   left_join(
     feature.pseudogenes %>%
+      filter(pfilter) %>%
       group_by(Gene = str_replace(overlap, pattern = "(^[Cmu|Cmi|Cro].*)\\.t\\d+",  replacement ="\\1")) %>%
       summarise(Pseudo.id = paste0(pid, collapse = ", "), Pseudo.parent = paste0(parent, collapse = ", "), Pseudo.n = n(), Pseudo.frac = mean(frac), Pseudo.ins = sum(ins), Pseudo.del = sum(del), Pseudo.shift = sum(shift), Pseudo.stop = sum(stop), Pseudo.polya = sum(polya), Pseudo.ident = mean(ident), Pseudo.type = paste0(type, collapse = ", ")),
     by = join_by(Gene)) %>%

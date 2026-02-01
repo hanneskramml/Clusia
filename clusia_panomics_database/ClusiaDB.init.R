@@ -210,7 +210,7 @@ for (i in 1:5) {
   tmp.alignment <- data %>%
     filter(Haplotype == "PREDOM") %>%
     mutate(Position = paste0(Chr, ':', Start, '-', End)) %>%
-    select(GeneFamily, Homoeolog.og, Group, Gene, Position) %>%
+    select(GeneFamily, Homoeolog.og, Group, Gene, Contig, Position) %>%
     left_join(feature.bam, by = join_by(Position)) %>%
     arrange(Gene, qname)
 
