@@ -92,6 +92,7 @@ dev.off()
 # Titratable acidity measurements
 phenotyping.acidity <- read_excel(paste(DATA_ROOT, "Experiments", "Phenotyping.acidity.xlsx", sep = '/'), sheet = "Acidity", range = "A1:T91", col_names = TRUE) %>%
   mutate(Group = substr(SampleID, 1, 3), .after = SampleID) %>%
+  relocate(Treatment, .after = Group) %>%
   mutate(BioRep = substr(Individual, 2, 2), .after = Individual) %>%
   mutate(DateTime = case_when(
     Timepoint == 1 ~ ymd_hms("2025-11-17 21:00:00"),
@@ -101,7 +102,7 @@ phenotyping.acidity <- read_excel(paste(DATA_ROOT, "Experiments", "Phenotyping.a
     Timepoint == 5 ~ ymd_hms("2025-11-18 21:00:00"),
     .default = NA),
   .after = Timepoint) %>%
-  mutate_at(c("Group", "Species", "Individual", "BioRep", "Treatment", "Timepoint"), as.factor) %>%
+  mutate_at(c("Group", "Treatment", "Species", "Individual", "BioRep", "Timepoint"), as.factor) %>%
   mutate(Treatment = fct_relevel(Treatment, c("Well-watered", "Drought"))) %>%
   rename(TA1 = "TA [μmol H+/g FW]") %>%
   rowwise(SampleID) %>%
@@ -151,20 +152,30 @@ dev.off()
 # delta TA
 phenotyping.acidity.delta <- phenotyping.acidity %>%
   pivot_longer(cols = c(TA1, TA2, TA3), names_to = "TechRep", values_to = "TA", values_drop_na = TRUE) %>%
-  pivot_wider(id_cols = c(Species, Individual, BioRep, Treatment, TechRep), names_from = Timepoint, names_prefix = "T", values_from = TA) %>%
-  mutate(TA.delta = T2-T1)
+  pivot_wider(id_cols = c(Treatment, Species, Individual, BioRep, TechRep), names_from = Timepoint, names_prefix = "T", values_from = TA) %>%
+  mutate(TA.delta = T2-T1) %>%
+  group_by(Treatment, Species, Individual) %>%
+  summarise(TA.TechRep.mean = mean(TA.delta)) %>%
+  mutate(TA.BioRep.n = n(), TA.BioRep.mean = mean(TA.TechRep.mean), TA.BioRep.sd = sd(TA.TechRep.mean), TA.BioRep.se = TA.BioRep.sd / sqrt(TA.BioRep.n))
 
 # Statistical test via two-way ANOVA and Tukey HSD
-TukeyHSD(aov(TA.delta ~ Species * Treatment, data = phenotyping.acidity.delta), which = "Species:Treatment")$`Species:Treatment`
+phenotyping.acidity.delta.aov <-
+  TukeyHSD(
+    aov(
+      TA.TechRep.mean ~ Species * Treatment,
+      data = phenotyping.acidity.delta %>% filter(Species != "Clusia minor")),
+    which = "Species:Treatment")$`Species:Treatment` %>%
+  as_tibble(rownames = "Species:Treatment")
 
 
-pdf(paste(RESULTS_DIR, "figs", "phenotyping.ta.delta.main.pdf", sep = '/'), width = 4, height = 7)
+pdf(paste(RESULTS_DIR, "figs", "phenotyping.ta.delta.main.pdf", sep = '/'), width = 5, height = 7)
 phenotyping.acidity.delta %>%
   filter(Species != "Clusia minor") %>%
-  ggplot(aes(x = Treatment, y = TA.delta, fill = Treatment)) +
+  ggplot(aes(x = Treatment, y = TA.BioRep.mean, fill = Treatment)) +
     geom_hline(yintercept=0, linetype="longdash", color = "black") +
-    geom_boxplot(width = 0.6, outlier.shape = NA, color = "black") +
-    geom_jitter(position = position_jitterdodge(jitter.width = 0.1, dodge.width  = 0.7), size = 2, alpha = 0.7, shape = 21, color = "black") +
+    geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black", width = 0.6) +
+    geom_errorbar(aes(ymin = TA.BioRep.mean - TA.BioRep.sd, ymax = TA.BioRep.mean + TA.BioRep.sd), width = 0.3, size = 0.3, alpha = 0.7) +
+    geom_jitter(aes(y = TA.TechRep.mean), position = position_jitterdodge(jitter.width = 0.1, dodge.width  = 0.7), size = 2, alpha = 0.7, shape = 21, color = "black") +
     scale_fill_manual(values = c("Well-watered" = "steelblue", "Drought" = "firebrick")) +
     labs(x = "Treatment", y = expression(Delta~"TA ["*mu*"mol H"^"+"*" g FW"^{-1}*"] (Morning – Evening)"), fill = "Treatment") +
     theme_bw(base_size = 12) +
@@ -176,10 +187,11 @@ dev.off()
 
 pdf(paste(RESULTS_DIR, "figs", "phenotyping.ta.delta.supplement.pdf", sep = '/'), width = 4, height = 7)
 phenotyping.acidity.delta %>%
-  ggplot(aes(x = Species, y = TA.delta, fill = Treatment)) +
+  ggplot(aes(x = Species, y = TA.BioRep.mean, fill = Treatment)) +
     geom_hline(yintercept = 0, linetype = "longdash", color = "black") +
-    geom_boxplot(position = position_dodge(width = 0.7), width = 0.6, outlier.shape = NA, color = "black") +
-    geom_jitter(position = position_jitterdodge(jitter.width = 0.1, dodge.width  = 0.7), size = 2, alpha = 0.7, shape = 21, color = "black") +
+    geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black", width = 0.6) +
+    geom_errorbar(aes(ymin = TA.BioRep.mean - TA.BioRep.sd, ymax = TA.BioRep.mean + TA.BioRep.sd), width = 0.3, size = 0.3, alpha = 0.7) +
+    geom_jitter(aes(y = TA.TechRep.mean), position = position_jitterdodge(jitter.width = 0.1, dodge.width  = 0.7), size = 2, alpha = 0.7, shape = 21, color = "black") +
     scale_fill_manual(breaks = c("Well-watered", "Drought"), values = c("steelblue", "#A73130")) +
     labs(x = "Species", y = expression(Delta~"TA ["*mu*"mol H"^"+"*" g FW"^{-1}*"] (Morning – Evening)"), fill = "Treatment") +
     theme_bw(base_size = 12) +
@@ -205,7 +217,7 @@ phenotyping.gasexchange <- read_delim(tmp.file, delim = ';', col_names = read_de
 # Clusia major (Figure 1b)
 start <- ymd_hms("2025-05-15 21:00:00")
 end <- ymd_hms("2025-05-16 21:00:00")
-pdf(paste(RESULTS_DIR, "figs", "phenotyping.gasexchange.major.pdf", sep = '/'), width = 7, height = 3)
+pdf(paste(RESULTS_DIR, "figs", "phenotyping.gasexchange.major.pdf", sep = '/'), width = 7, height = 4)
 
 phenotyping.gasexchange %>%
   mutate(x = ymd_hms(cut(DateTime, breaks = "25 mins"), quiet = TRUE)) %>%
@@ -227,7 +239,7 @@ dev.off()
 # Clusia rosea (Figure 1b)
 start <- ymd_hms("2025-05-17 21:00:00")
 end <- ymd_hms("2025-05-18 21:00:00")
-pdf(paste(RESULTS_DIR, "figs", "phenotyping.gasexchange.rosea.pdf", sep = '/'), width = 7, height = 3)
+pdf(paste(RESULTS_DIR, "figs", "phenotyping.gasexchange.rosea.pdf", sep = '/'), width = 7, height = 4)
 
 phenotyping.gasexchange %>%
   mutate(x = ymd_hms(cut(DateTime, breaks = "25 mins"), quiet = TRUE)) %>%
@@ -267,8 +279,7 @@ read_csv(paste(DATA_ROOT, "Experiments", "OpenGreenhouse.arduino.env.csv", sep =
   drop_na(cycle)
 
 # Water availability (Figure 5a)
-pdf(paste(RESULTS_DIR, "figs", "opengreenhouse.water.pdf", sep = '/'), width = 7, height = 4)
-read_csv(paste(DATA_ROOT, "Experiments", "OpenGreenhouse.arduino.soil.csv", sep = '/')) %>%
+opengreenhouse.arduino.soil <- read_csv(paste(DATA_ROOT, "Experiments", "OpenGreenhouse.arduino.soil.csv", sep = '/')) %>%
   mutate(datetime = ymd(date) + hms(timeofday), .before = date) %>%
   mutate(species = case_when(
     str_starts(rep, "F") ~ "Cmajor",
@@ -277,7 +288,10 @@ read_csv(paste(DATA_ROOT, "Experiments", "OpenGreenhouse.arduino.soil.csv", sep 
     .default = NA)) %>%
   drop_na(species) %>%
   group_by(datetime, condition, species) %>%
-  summarise(SoilMoisture = mean(SoilMoisture, na.rm = TRUE)) %>%
+  summarise(SoilMoisture = mean(SoilMoisture, na.rm = TRUE))
+
+pdf(paste(RESULTS_DIR, "figs", "opengreenhouse.water.pdf", sep = '/'), width = 7, height = 4)
+opengreenhouse.arduino.soil %>%
   ggplot(aes(x = datetime, y = SoilMoisture, color = species, linetype = condition)) +
   geom_line() +
   scale_color_manual(breaks=c("Cmajor", "Crosea"), values = c("#A73130", "#133D66")) +

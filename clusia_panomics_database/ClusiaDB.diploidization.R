@@ -69,7 +69,7 @@ data.diploidization %>%
 dev.off()
 
 
-# Plot figures for genic diploidization (Figure 4a, Supplemental Fig. 6)
+# Plot figures for genic diploidization (Figure 4a, Supplementary Fig. 7)
 data.diploidization.plot <-
   data.diploidization %>%
   filter(!is.na(Pathway)) %>%

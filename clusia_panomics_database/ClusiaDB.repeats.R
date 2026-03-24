@@ -76,21 +76,17 @@ feature.repeats.landscape <- src.repeats %>%
       distinct(chr, repeats) %>%
       count(repeats),
     by = join_by(repeats)) %>%
-  mutate(perc = bp/size/n)
-
-
-pdf(paste(RESULTS_DIR, "figs", "repeat.landscape.pdf", sep = '/'), height = 4)
-feature.repeats.landscape %>%
+  mutate(perc = bp/size/n) %>%
   mutate(order = str_split_i(order,"/", 1)) %>%
   mutate(order = if_else(order %in% c("Crypton", "DIRS", "Evirus", "MobileElement", "PLE", "rRNA", "subtelomere", "Satellite", "SINE"), "Other", order)) %>%
   group_by(order, div) %>%
-  summarise(bp = sum(bp), perc = sum(perc)) %>%
-  #filter(order == "LINE") %>%
+  summarise(bp = sum(bp), perc = sum(perc))
+
+pdf(paste(RESULTS_DIR, "figs", "repeat.landscape.pdf", sep = '/'), height = 4)
+feature.repeats.landscape %>%
   ggplot(aes(fill=order, y=perc, x=div)) +
   geom_bar(position="stack", stat="identity",color="black", alpha=0.8, linewidth = 0) +
   scale_fill_manual(values = gs_colors(12)) +
-  #scale_fill_manual(values = "#E7845C") +
-  #viridis::scale_fill_viridis(discrete = T, option = "E") +
   theme_classic() +
   xlab("Kimura substitution level") +
   ylab("Percent of the genome") +
@@ -101,16 +97,10 @@ dev.off()
 
 pdf(paste(RESULTS_DIR, "figs", "repeat.landscape.line.pdf", sep = '/'), height = 4)
 feature.repeats.landscape %>%
-  mutate(order = str_split_i(order,"/", 1)) %>%
-  mutate(order = if_else(order %in% c("Crypton", "DIRS", "Evirus", "MobileElement", "PLE", "rRNA", "subtelomere", "Satellite", "SINE"), "Other", order)) %>%
-  group_by(order, div) %>%
-  summarise(bp = sum(bp), perc = sum(perc)) %>%
   filter(order == "LINE") %>%
   ggplot(aes(fill=order, y=perc, x=div)) +
   geom_bar(position="stack", stat="identity",color="black", alpha=0.8, linewidth = 0) +
-  #scale_fill_manual(values = gs_colors(12)) +
   scale_fill_manual(values = "#E7845C") +
-  #viridis::scale_fill_viridis(discrete = T, option = "E") +
   theme_classic() +
   xlab("Kimura substitution level") +
   ylab("Percent of the genome") +

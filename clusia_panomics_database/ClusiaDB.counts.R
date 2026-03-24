@@ -47,7 +47,7 @@ feature.counts.og.vitis %>%
   scale_x_continuous(name="Relative gene copies per outgroup", breaks=0:10, limits=c(0, 10))
 dev.off()
 
-# Plot gene familiy expansion/contraction, Figure 3d
+# Plot gene familiy expansion/contraction, Figure 4d
 pdf(paste(RESULTS_DIR, "figs", "counts.og.vitis.variation.pdf", sep = '/'), height = 4, width = 8)
 feature.counts.og.vitis %>%
   pivot_longer(cols = !Orthogroup, names_to = "Species", values_to = "ratio") %>%
