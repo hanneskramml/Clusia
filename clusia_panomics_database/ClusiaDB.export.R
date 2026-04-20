@@ -100,15 +100,15 @@ feature.goterms.conserved %>%
 data.diploidization.plot %>%
   write_tsv(paste(EXPORT_DIR, "Supplementary_Fig7.SummarizedDiploidization.tsv", sep = '/'), na = "")
 
-# Supplementary Figure 8
+# Supplementary Figure 9 and 10
 data.transcriptomics.plot %>%
   mutate(Genes = str_replace_all(Genes, pattern = "Cmu(..)",  replacement ="Cma\\1")) %>%
-  write_tsv(paste(EXPORT_DIR, "Supplementary_Fig8.GeneExpression.tsv", sep = '/'), na = "")
+  write_tsv(paste(EXPORT_DIR, "Supplementary_Fig9_10.GeneExpression.tsv", sep = '/'), na = "")
 
-# Supplementary Figure 9
+# Supplementary Figure 11 and 12
 data.proteomics.plot %>%
   mutate(Genes = str_replace_all(Genes, pattern = "Cmu(..)",  replacement ="Cma\\1")) %>%
-  write_tsv(paste(EXPORT_DIR, "Supplementary_Fig9.ProteinAbundance.tsv", sep = '/'), na = "")
+  write_tsv(paste(EXPORT_DIR, "Supplementary_Fig11_12.ProteinAbundance.tsv", sep = '/'), na = "")
 
 
 # TPM matrices for NCBI GEO submission

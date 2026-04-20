@@ -1,4 +1,7 @@
-# Clusia
+![GitHub Release](https://img.shields.io/github/v/release/hanneskramml/clusia)
+[![DOI](https://zenodo.org/badge/804242299.svg)](https://doi.org/10.5281/zenodo.19212189)
+
+# _Clusia_ code repository
 Supplementary Code accompanying the manuscript **_Clusia_ genomes shed light on the evolution and diversity of CAM physiotypes (_Nature Communications_, 2026)**
 
 ## 📘 Overview
@@ -33,12 +36,12 @@ git checkout Manuscript1
 ```
 
 ### Get the rawdata
-- Link to **figshare**: https://doi.org/10.6084/m9.figshare.26212895
+- Link to **figshare**: https://doi.org/10.6084/m9.figshare.27599406
 - Download the following raw data and place it in the `data` folder:
-- Supplementary Data 2-6, Supplementary Data 9-11
+- Dataset 2-6, Dataset 9-11
 
 ### Run analyses
-The entire pipeline can be executed by running the script `ClusiaDB.R`. Set paths accordingly.
+Set paths in `ClusiaDB.R` accordingly. The entire pipeline can be executed by running one of the following scripts:
 ```bash
 cd clusia_panomics_database
 ./run

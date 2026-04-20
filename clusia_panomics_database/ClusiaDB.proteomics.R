@@ -47,8 +47,7 @@ data.proteomics.plot <-
     ungroup()
 
 
-# Supplemental Figure 8
-
+# Supplementary Figures
 pdf(paste(RESULTS_DIR, "figs", "proteins.cam.control.pdf", sep = '/'), width = 10, height = 8)
 data.proteomics.plot %>%
   filter(Condition == "C") %>%

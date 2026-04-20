@@ -53,8 +53,7 @@ data.transcriptomics.plot <-
   ungroup()
 
 
-# Supplemental Figure 7
-
+# Supplementary Figures
 pdf(paste(RESULTS_DIR, "figs", "expression.cam.control.pdf", sep = '/'), width = 9, height = 13)
 data.transcriptomics.plot %>%
   filter(Condition == "C") %>%
